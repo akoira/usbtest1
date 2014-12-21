@@ -53,16 +53,16 @@
   */ 
 
 #define USBD_VID                   0x0483
-#define USBD_PID                   0x572B
+#define USBD_PID                   0x5710
 
 #define USBD_LANGID_STRING         0x409
 #define USBD_MANUFACTURER_STRING   "STMicroelectronics"
 
 
 #define USBD_PRODUCT_HS_STRING        "HID Joystick in HS Mode"
-#define USBD_SERIALNUMBER_HS_STRING   "00000000001A"
-#define USBD_PRODUCT_FS_STRING        "HID Joystick in FS Mode"
-#define USBD_SERIALNUMBER_FS_STRING   "00000000001B"
+#define USBD_SERIALNUMBER_HS_STRING   "000000000000"
+#define USBD_PRODUCT_FS_STRING        "AKOYRO HID Joystick"
+#define USBD_SERIALNUMBER_FS_STRING   "000000000000"
 #define USBD_CONFIGURATION_HS_STRING  "HID Config"
 #define USBD_INTERFACE_HS_STRING      "HID Interface"
 #define USBD_CONFIGURATION_FS_STRING  "HID Config"
