@@ -72,6 +72,7 @@ int16_t Buffer[3];
 
 /* MEMS thresholds {Low/High} */
 static int16_t ThreadholdAcceleroLow = -110, ThreadholdAcceleroHigh = 110;
+static uint8_t HID_Buffer[4] = {0};
 
 /* Variables used for USB */
 USBD_HandleTypeDef  hUSBDDevice;
@@ -343,13 +344,13 @@ void HAL_SYSTICK_Callback(void)
   
  if (DemoEnterCondition != 0x00)
   {
-    buf = USBD_HID_GetPos();
-    if((buf[1] != 0) ||(buf[2] != 0))
-    {
-      USBD_HID_SendReport (&hUSBDDevice, 
-                           buf,
-                           4);
-    } 
+	buf = USBD_HID_GetPos();
+	if((buf[1] != 0) ||(buf[2] != 0))
+	{
+	  USBD_HID_SendReport (&hUSBDDevice,
+			  buf,
+						   4);
+	}
     Counter ++;
     if (Counter == 10)
     {
@@ -468,19 +469,26 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 */
 static uint8_t *USBD_HID_GetPos (void)
 {
-  static uint8_t HID_Buffer[4] = {0};
-  
-  HID_Buffer[1] = 0;
-  HID_Buffer[2] = 0;
+  //static uint8_t HID_Buffer[4] = {0};
+  HID_Buffer[0] = 0x01;
+
   /* LEFT Direction */
   if((X_Offset) < ThreadholdAcceleroLow)
   {
     HID_Buffer[1] -= CURSOR_STEP;
+    if (HID_Buffer[1] < 0x81)
+    {
+    	HID_Buffer[1] = 0x81;
+    }
   }
   /* RIGHT Direction */ 
   if((X_Offset) > ThreadholdAcceleroHigh)
   {
    HID_Buffer[1] += CURSOR_STEP;
+   if (HID_Buffer[1] > 0x7F)
+   {
+   	HID_Buffer[1] = 0x7F;
+   }
   } 
   /* DOWN Direction */
   if((Y_Offset) < ThreadholdAcceleroLow)
