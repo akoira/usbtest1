@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    lis3dsh.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    19-June-2014
+  * @version V1.0.2
+  * @date    02-December-2014
   * @brief   This file contains all the functions prototypes for the lis3dsh.c
   *          firmware driver.
   ******************************************************************************
@@ -423,7 +423,7 @@ typedef struct
 *  6 FIFO_EN: FIFO Enable 
 *             0: disable (Default)
 *             1: enable
-*  5 STP_WTM: Stop on Watermark - FIFO depth can be limited at the Watermark value, by setting to ï¿½1ï¿½ the STP_WTM bit. 
+*  5 STP_WTM: Stop on Watermark - FIFO depth can be limited at the Watermark value, by setting to “1” the STP_WTM bit. 
 *             0: disable (Default)
 *             1: enable
 *  4 IF_ADD_INC: Register address automatically increased during a multiple byte access with a serial interface (I2C or SPI)
