@@ -62,6 +62,8 @@ void PendSV_Handler(void);
 void SysTick_Handler(void);
 void EXTI0_IRQHandler(void);
 void OTG_FS_IRQHandler(void);
+void ADC_IRQHandler(void);
+void ADCx_DMA_IRQHandler(void);
 #ifdef __cplusplus
 }
 #endif
