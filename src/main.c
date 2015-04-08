@@ -153,7 +153,8 @@ static void Demo_Exec(void)
     Error_Handler(); 
   }
 
-  ADCInit();
+  ADC_INIT(&AdcHandle, ADC1, ADC_CHANNEL_8, (uint32_t *) &uhADCxConvertedValue);
+  //ADCInit();
 
   while(1)
   {

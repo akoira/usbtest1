@@ -48,6 +48,8 @@
 #include "usbd_desc.h"
 #include "usbd_hid.h" 
 
+#include "adc1.h"
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Definition for ADCx clock resources */
