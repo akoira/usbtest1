@@ -88,7 +88,7 @@ __IO uint16_t MaxAcceleration = 0;
 
 ADC_HandleTypeDef    AdcHandle;
 /* Variable used to get converted value */
-__IO uint32_t uhADCxConvertedValue[3];
+__IO uint16_t uhADCxConvertedValue = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 static uint32_t Demo_USBConfig(void);
@@ -96,6 +96,8 @@ static void TIM4_Config(void);
 static void Demo_Exec(void);
 static uint8_t *USBD_HID_GetPos (void);
 static void SystemClock_Config(void);
+static void Error_Handler(void);
+void ADCInit(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -151,7 +153,7 @@ static void Demo_Exec(void)
     Error_Handler(); 
   }
 
-  ADC_INIT(&AdcHandle, uhADCxConvertedValue);
+  ADC_INIT(&AdcHandle, ADC1, ADC_CHANNEL_8, (uint32_t *) &uhADCxConvertedValue);
   //ADCInit();
 
   while(1)
@@ -511,6 +513,20 @@ static uint8_t *USBD_HID_GetPos (void)
 }
 
 /**
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
+  */
+static void Error_Handler(void)
+{
+  /* Turn LED4 (RED) on */
+  BSP_LED_On(LED4);
+  while(1)
+  {
+  }
+}
+
+/**
   * @brief  System Clock Configuration
   *         The system Clock is configured as follow : 
   *            System Clock source            = PLL (HSE)
@@ -565,12 +581,59 @@ static void SystemClock_Config(void)
 }
 
 
+void ADCInit(void){
+	  ADC_ChannelConfTypeDef sConfig;
+	 /*##-1- Configure the ADC peripheral #######################################*/
+	  AdcHandle.Instance = ADCx;
+
+	  AdcHandle.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+	  AdcHandle.Init.Resolution = ADC_RESOLUTION_12B;
+	  AdcHandle.Init.ScanConvMode = DISABLE;
+	  AdcHandle.Init.ContinuousConvMode = ENABLE;
+	  AdcHandle.Init.DiscontinuousConvMode = DISABLE;
+	  AdcHandle.Init.NbrOfDiscConversion = 0;
+	  AdcHandle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+	  AdcHandle.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_CC1;
+	  AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	  AdcHandle.Init.NbrOfConversion = 1;
+	  AdcHandle.Init.DMAContinuousRequests = ENABLE;
+	  AdcHandle.Init.EOCSelection = DISABLE;
+	  if(HAL_ADC_Init(&AdcHandle) != HAL_OK)
+	  {
+	    /* Initialization Error */
+	    Error_Handler();
+	  }
+
+	  /*##-2- Configure ADC regular channel ######################################*/
+	  /* Note: Considering IT occurring after each number of size of              */
+	  /*       "uhADCxConvertedValue"  ADC conversions (IT by DMA end             */
+	  /*       of transfer), select sampling time and ADC clock with sufficient   */
+	  /*       duration to not create an overhead situation in IRQHandler.        */
+	  sConfig.Channel = ADCx_CHANNEL;
+	  sConfig.Rank = 1;
+	  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+	  sConfig.Offset = 0;
+
+	  if(HAL_ADC_ConfigChannel(&AdcHandle, &sConfig) != HAL_OK)
+	  {
+	    /* Channel Configuration Error */
+	    Error_Handler();
+	  }
+
+	  /*##-3- Start the conversion process and enable interrupt ##################*/
+	  if(HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)&uhADCxConvertedValue, 1) != HAL_OK)
+	  {
+	    /* Start Conversation Error */
+	    Error_Handler();
+	  }
+
+}
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle)
 {
   /* Turn LED4 on: Transfer process is correct */
   BSP_LED_On(LED4);
-  trace_printf("Value1: %u -- Value2: %u --  Value3: %u\n ",  uhADCxConvertedValue[0], uhADCxConvertedValue[1], uhADCxConvertedValue[2]);
-  //HAL_ADC_GetValue(AdcHandle));
+  trace_printf("Value: %u\n",  HAL_ADC_GetValue(AdcHandle));
 
 }
 
