@@ -217,24 +217,39 @@ __ALIGN_BEGIN static uint8_t USBD_HID_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_
 __ALIGN_BEGIN static uint8_t HID_Joystick_ReportDesc1[HID_JOYSTICK_REPORT_DESC_SIZE]  __ALIGN_END =
 {
 		/* 30 */
-	    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
-	    0x09, 0x04,                    // USAGE (Joystick)
-	    0xa1, 0x01,                    // COLLECTION (Application)
-	    0xa1, 0x00,                    //   COLLECTION (Physical)
-	    0x85, 0x01,                    //     REPORT_ID (1)
-	    0x09, 0x32,                    //     USAGE (Z)
-	    0x09, 0x33,                    //     USAGE (Rx)
-	    0x09, 0x34,                    //     USAGE (Ry)
-//	    0x16, 0x01, 0xf8,              //     LOGICAL_MINIMUM (-2047)
-//	    0x26, 0xff, 0x07,              //     LOGICAL_MAXIMUM (2047)
-//	    0x75, 0x20,                    //     REPORT_SIZE (32)
-	    0x15, 0x81,
-	    0x25, 0x7F,
-	    0x75, 0x08,
-	    0x95, 0x03,                    //     REPORT_COUNT (3)
-	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)
-	    0xc0,                          //     END_COLLECTION
-	    0xc0                           // END_COLLECTION
+	    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop) 2
+	    0x09, 0x04,                    // USAGE (Joystick) 4
+	    0xa1, 0x01,                    // COLLECTION (Application)6
+	    0xa1, 0x00,                    //   COLLECTION (Physical)8
+	    0x85, 0x01,                    //     REPORT_ID (1)10
+	    0x09, 0x32,                    //     USAGE (Z)12
+	    0x16, 0x01, 0xf8,              //     LOGICAL_MINIMUM (-2047)15
+	    0x26, 0xff, 0x07,              //     LOGICAL_MAXIMUM (2047)18
+	    0x36, 0x01, 0xf8,				// 	  PHISICAL_MINIMUM (-2047)21
+	    0x46, 0xff, 0x07,				//	  PHISICAL_MAXIMUM (2047)24
+	    0x75, 0x10,                    //     REPORT_SIZE (16)26
+	    0x95, 0x01,                    //     REPORT_COUNT (1)28
+	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)30
+	    0x85, 0x02,                    //     REPORT_ID (2)32
+	    0x09, 0x33,                    //     USAGE (Rx)34
+	    0x15, 0x00,						//    LOGICAL_MINIMUM (0)38
+	    0x26, 0x00, 0x10,				//    LOGICAL_MAXIMUM (4096)41
+	    0x35, 0x00,						// 	  PHISICAL_MINIMUM (0)43
+	    0x46, 0x00, 0x10, 				//	  PHISICAL_MAXIMUM (4096)46
+	    0x75, 0x10,                    //     REPORT_SIZE (16)48
+	    0x95, 0x01,                    //     REPORT_COUNT (1)50
+	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)52
+	    0x85, 0x03,                    //     REPORT_ID (3)54
+	    0x09, 0x34,                    //     USAGE (Ry)56
+	    0x15, 0x00,						//    LOGICAL_MINIMUM (0)58
+	    0x26, 0x00, 0x10,				//    LOGICAL_MAXIMUM (4096)61
+	    0x35, 0x00,						// 	  PHISICAL_MINIMUM (0)63
+	    0x46, 0x00, 0x10, 				//	  PHISICAL_MAXIMUM (4096)66
+	    0x75, 0x10,                    //     REPORT_SIZE (16)68
+	    0x95, 0x01,                    //     REPORT_COUNT (1)70
+	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)72
+	    0xc0,                          //     END_COLLECTION 73
+	    0xc0                           // END_COLLECTION 74
 };
 
 

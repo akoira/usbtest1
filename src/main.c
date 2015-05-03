@@ -86,9 +86,10 @@ TIM_OC_InitTypeDef sConfigTim4;
 uint8_t Counter  = 0x00;
 __IO uint16_t MaxAcceleration = 0;
 
+//ADC
 ADC_HandleTypeDef    AdcHandle;
-/* Variable used to get converted value */
-__IO uint32_t uhADCxConvertedValue[3];
+uint32_t adcConvertedValue[3];
+unsigned int sumValue[3];
 
 /* Private function prototypes -----------------------------------------------*/
 static uint32_t Demo_USBConfig(void);
@@ -96,6 +97,7 @@ static void TIM4_Config(void);
 static void Demo_Exec(void);
 static uint8_t *USBD_HID_GetPos (void);
 static void SystemClock_Config(void);
+static void send2USB(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -124,11 +126,11 @@ int main(void)
   SystemClock_Config();
 
   /* Initialize LEDs and User_Button on STM32F401-Discovery ------------------*/
-  BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_EXTI); 
+  BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_EXTI);
 
   /* Execute Demo application */
   Demo_Exec();
-  
+
   /* Infinite loop */
   while (1)
   {    
@@ -148,72 +150,34 @@ static void Demo_Exec(void)
   if(BSP_ACCELERO_Init() != HAL_OK)
   {
     /* Initialization Error */
-    Error_Handler(); 
+    Error_Handler();
   }
 
-  ADC_INIT(&AdcHandle, uhADCxConvertedValue);
-  //ADCInit();
-
-  while(1)
-  {
+ while(1)
+ {
     DemoEnterCondition = 0x00;
-    
+
     /* Reset UserButton_Pressed variable */
     UserButtonPressed = 0x00;
-    
+
     /* Initialize LEDs to be managed by GPIO */
     BSP_LED_Init(LED4);
     BSP_LED_Init(LED3);
     BSP_LED_Init(LED5);
     BSP_LED_Init(LED6);
-    
+
     /* SysTick end of count event each 10ms */
     SystemCoreClock = HAL_RCC_GetHCLKFreq();
-    SysTick_Config(SystemCoreClock / 100);  
-    
+    SysTick_Config(SystemCoreClock / 100);
+
     /* Turn OFF all LEDs */
     BSP_LED_Off(LED4);
     BSP_LED_Off(LED3);
     BSP_LED_Off(LED5);
     BSP_LED_Off(LED6);
-    
-    /* Waiting User Button is pressed */
-    while (UserButtonPressed == 0x00)
-    {
-      /* Toggle LED4 */
-      BSP_LED_Toggle(LED4);
-      HAL_Delay(10);
-      /* Toggle LED4 */
-      BSP_LED_Toggle(LED3);
-      HAL_Delay(10);
-      /* Toggle LED4 */
-      BSP_LED_Toggle(LED5);
-      HAL_Delay(10);
-      /* Toggle LED4 */
-      BSP_LED_Toggle(LED6);
-      HAL_Delay(10);
-      togglecounter ++;
-      if (togglecounter == 0x10)
-      {
-        togglecounter = 0x00;
-        while (togglecounter < 0x10)
-        {
-          BSP_LED_Toggle(LED4);
-          BSP_LED_Toggle(LED3);
-          BSP_LED_Toggle(LED5);
-          BSP_LED_Toggle(LED6);
-          HAL_Delay(10);
-          togglecounter ++;
-        }
-        togglecounter = 0x00;
-      }
-    }
-    
-    /* Waiting User Button is Released */
-    while (BSP_PB_GetState(BUTTON_KEY) != KEY_NOT_PRESSED)
-    {}
+
     UserButtonPressed = 0x00;
-    
+
     /* TIM4 channels configuration */
     TIM4_Config();
   
@@ -222,6 +186,8 @@ static void Demo_Exec(void)
     /* USB configuration */
     Demo_USBConfig();
     
+    ADC_INIT(&AdcHandle, adcConvertedValue);
+
     /* Waiting User Button is pressed */
     while (UserButtonPressed == 0x00)
     {}
@@ -337,6 +303,54 @@ static void TIM4_Config(void)
   }
 }
 
+void send2USB()
+{
+	unsigned int value0 = Filter(adcConvertedValue[0], &sumValue[0]) - 2047;
+	unsigned int value1 = Filter(adcConvertedValue[1], &sumValue[1]);
+	unsigned int value2 = Filter(adcConvertedValue[2], &sumValue[2]);
+
+	//trace_printf("value0: %u -- value1: %u -- value2: %u\n ",value0, value1, value2);
+
+	static uint8_t order = 0;
+	static uint8_t buff0[3];
+	static uint8_t buff1[3];
+	static uint8_t buff2[3];
+
+	//report id
+	buff0[0] = 0x01;
+	buff1[0] = 0x02;
+	buff2[0] = 0x03;
+
+	switch (order)
+	{
+		case 0:
+			buff0[1] = ((value0 >> 0) & 0xff); //value0 lo bites
+			buff0[2] = ((value0 >> 8) & 0xff); //value0 hi bites
+			USBD_HID_SendReport (&hUSBDDevice,buff0,3);
+			order = 1;
+			break;
+		case 1:
+			buff1[1] = ((value1 >> 0) & 0xff); //value0 lo bites
+			buff1[2] = ((value1 >> 8) & 0xff); //value0 hi bites
+			USBD_HID_SendReport (&hUSBDDevice,buff1,3);
+			order = 2;
+			break;
+		case 2:
+			buff2[1] = ((value2 >> 0) & 0xff); //value0 lo bites
+			buff2[2] = ((value2 >> 8) & 0xff); //value0 hi bites
+			USBD_HID_SendReport (&hUSBDDevice,buff2,3);
+			order = 0;
+			break;
+	}
+
+//
+//	buff[5] = ((value1 >> 0) & 0xff); //value0 lo bites
+//	buff[6] = ((value1 >> 8) & 0xff); //value0 hi bites
+
+
+}
+
+
 /**
   * @brief  SYSTICK callback.
   * @param  None
@@ -344,13 +358,52 @@ static void TIM4_Config(void)
   */
 void HAL_SYSTICK_Callback(void)
 {
+	if (1)
+	{
+				send2USB();
+				return;
+	}
+
   uint8_t *buf;
   uint16_t Temp_X, Temp_Y = 0x00;
   uint16_t NewARR_X, NewARR_Y = 0x00;
   
- if (DemoEnterCondition != 0x00)
+
+  static uint8_t buff[3];
+  buff[0] = 0x01;
+
+  //-2047
+  //buff[1] = 0xff;
+  //buff[2] = 0x87;
+
+  //2047
+  //buff[1] = 0xff;
+  //buff[2] = 0x07;
+
+  unsigned int value = Filter(adcConvertedValue[0], &sumValue[0]) - 2047;
+
+  buff[2] = ((value >> 8) & 0xff);
+  buff[1] = ((value >> 0) & 0xff);
+
+  //trace_printf("value: %u -- buff.hi: %u --  buff.lo: %u\n ",value,  buff[1],buff[2]);
+
+
+//  buff[1] = ((value >> 8) & 0xff); hi
+//  buff[2] = ((-2047 >> 0) & 0xff); lo
+
+  USBD_HID_SendReport (&hUSBDDevice,
+		  buff,
+					   3);
+
+
+//  USBD_HID_SendReport (&hUSBDDevice,
+//		  buff,
+//					   4);
+
+ if (DemoEnterCondition == 0x00)
   {
 	buf = USBD_HID_GetPos();
+	buf[1] =  Filter(adcConvertedValue[0], &sumValue[0]);
 	if((buf[1] != 0) ||(buf[2] != 0))
 	{
 	  USBD_HID_SendReport (&hUSBDDevice,
@@ -563,17 +616,6 @@ static void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;  
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 }
-
-
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle)
-{
-  /* Turn LED4 on: Transfer process is correct */
-  BSP_LED_On(LED4);
-  trace_printf("Value1: %u -- Value2: %u --  Value3: %u\n ",  uhADCxConvertedValue[0], uhADCxConvertedValue[1], uhADCxConvertedValue[2]);
-  //HAL_ADC_GetValue(AdcHandle));
-
-}
-
 /**
   * @}
   */

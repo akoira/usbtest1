@@ -118,7 +118,7 @@ void __ADC_INIT(ADC_HandleTypeDef* hadc)
 
   /*##-4- Configure the NVIC for DMA #########################################*/
   /* NVIC configuration for DMA transfer complete interrupt */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 15, 15);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 }
 

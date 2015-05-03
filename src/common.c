@@ -7,6 +7,19 @@
 
 #include "common.h"
 
+unsigned int N = 10;
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
+  */
+unsigned int Filter(unsigned int sample, unsigned int *sum){
+    *sum -= *sum/N;
+    *sum += sample;
+
+    return *sum/N;
+}
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @param  None
@@ -20,5 +33,4 @@ void Error_Handler(void)
   {
   }
 }
-
 
