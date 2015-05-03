@@ -48,7 +48,8 @@
 #include "usbd_desc.h"
 #include "usbd_hid.h" 
 
-#include "adc1.h"
+#include "adc.h"
+#include "common.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
