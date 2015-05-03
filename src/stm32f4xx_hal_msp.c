@@ -37,7 +37,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "adc1.h"
+#include "adc.h"
 
 /** @addtogroup STM32F4xx_HAL_Applications
   * @{
@@ -94,10 +94,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
   */
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 {
-	  __HAL_RCC_GPIOB_CLK_ENABLE();
-	  __HAL_RCC_DMA2_CLK_ENABLE();
-
-	ADC1_INIT(hadc);
+	__ADC_INIT(hadc);
 	//ADC2_INIT(hadc);
 }
 
@@ -114,8 +111,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef *hadc)
 	  __HAL_RCC_ADC_FORCE_RESET();
 	  __HAL_RCC_ADC_RELEASE_RESET();
 
-	  ADC1_DEINIT(hadc);
-	  //ADC2_DEINIT(hadc);
+	  ADC_DEINIT(hadc);
 }
 
 
